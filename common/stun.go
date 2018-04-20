@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/ccding/go-stun/stun"
-	"github.com/meshbird/meshbird/log"
+	"github.com/rmnoff/meshbird/log"
 )
 
 const (

@@ -1,11 +1,11 @@
-package common
+rmnoffpackage common
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/meshbird/meshbird/log"
-	"github.com/meshbird/meshbird/network"
-	"github.com/meshbird/meshbird/secure"
+	"github.com/rmnoff/meshbird/log"
+	"github.com/rmnoff/meshbird/network"
+	"github.com/rmnoff/meshbird/secure"
 	"io/ioutil"
 	"net"
 	"os"

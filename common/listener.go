@@ -3,8 +3,8 @@ package common
 import (
 	"fmt"
 	"github.com/anacrolix/utp"
-	"github.com/meshbird/meshbird/log"
-	"github.com/meshbird/meshbird/network/protocol"
+	"github.com/rmnoff/meshbird/log"
+	"github.com/rmnoff/meshbird/network/protocol"
 	"net"
 )
 

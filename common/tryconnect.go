@@ -1,14 +1,14 @@
 package common
 
 import (
-	"github.com/meshbird/meshbird/secure"
+	"github.com/rmnoff/meshbird/secure"
 	"net"
 	"strconv"
 	"time"
 	"fmt"
-	"github.com/meshbird/meshbird/log"
+	"github.com/rmnoff/meshbird/log"
 	"github.com/anacrolix/utp"
-	"github.com/meshbird/meshbird/network/protocol"
+	"github.com/rmnoff/meshbird/network/protocol"
 )
 
 func TryConnect(h string, networkSecret *secure.NetworkSecret, ln *LocalNode) (*RemoteNode, error) {

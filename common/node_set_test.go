@@ -1,7 +1,7 @@
 package common_test
 
 import (
-	"github.com/meshbird/meshbird/common"
+	"github.com/rmnoff/meshbird/common"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

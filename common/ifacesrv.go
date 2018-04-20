@@ -2,8 +2,8 @@ package common
 
 import (
 	"fmt"
-	"github.com/meshbird/meshbird/log"
-	"github.com/meshbird/meshbird/network"
+	"github.com/rmnoff/meshbird/log"
+	"github.com/rmnoff/meshbird/network"
 	"strconv"
 )
 
