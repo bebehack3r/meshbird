@@ -26,12 +26,10 @@ func NewLocalNode(cfg *Config) (*LocalNode, error) {
 	var err error
 	n := new(LocalNode)
 	n.logger = log.L("local")
-
 	n.secret, err = secure.NetworkSecretUnmarshal(cfg.SecretKey)
 	if err != nil {
 		return nil, err
 	}
-
 	n.config = cfg
 	n.config.NetworkID = n.secret.InfoHash()
 	n.state = NewState(n.secret)

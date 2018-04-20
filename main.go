@@ -124,12 +124,10 @@ func actionJoin(ctx *cli.Context) error {
 	if NetworkKey == "" {
 		log.Fatal(keyNotSetError.Error())
 	}
-
 	node, err := common.NewLocalNode(&common.Config{SecretKey: NetworkKey})
 	if err != nil {
 		log.Fatal("error on setup local node, %v", err)
 	}
-
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, os.Kill)
 	defer signal.Stop(signalChan)
@@ -142,7 +140,6 @@ func actionJoin(ctx *cli.Context) error {
 		time.Sleep(2 * time.Second)
 		os.Exit(0)
 	}()
-
 	err = node.Start()
 	if err != nil {
 		log.Fatal("error on local node start, %v", err)
