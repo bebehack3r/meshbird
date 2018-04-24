@@ -7,7 +7,7 @@ import (
 	"time"
 	"fmt"
 	"github.com/rmnoff/meshbird/log"
-	"github.com/anacrolix/utp"
+	"github.com/anacrolix/go-libutp"
 	"github.com/rmnoff/meshbird/network/protocol"
 )
 
@@ -31,11 +31,11 @@ func TryConnect(h string, networkSecret *secure.NetworkSecret, ln *LocalNode) (*
 
 	s, errSocket := utp.NewSocket("udp4", ":0")
 	if errSocket != nil {
-		rn.logger.Error("unable to crete a socket, %v", errSocket)
+		rn.logger.Error("unable to create a socket, %v", errSocket)
 		return nil, errSocket
 	}
 
-	conn, errDial := s.DialTimeout(rn.publicAddress, 10 * time.Second)
+	conn, errDial := s.DialTimeout(rn.publicAddress, 60 * time.Second)
 	if errDial != nil {
 		rn.logger.Error("unable to dial, %s", errDial)
 		return nil, errDial

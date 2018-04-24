@@ -1,4 +1,4 @@
-rmnoffpackage common
+package common
 
 import (
 	"encoding/json"

@@ -69,7 +69,7 @@ func (l *ListenerService) process(c net.Conn) error {
 		return fmt.Errorf("invalid magic bytes")
 	}
 
-	l.logger.Debug("maginc is correct, replying...")
+	l.logger.Debug("magic is correct, replying...")
 
 	if err := protocol.WriteEncodeOk(c); err != nil {
 		return err
