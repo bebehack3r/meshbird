@@ -66,13 +66,14 @@ func (nt *NetTable) RemoteNodeByIP(ip net.IP) *RemoteNode {
 	return nt.peers[ip.To4().String()]
 }
 
-func (nt *NetTable) AddRemoteNode(rn *RemoteNode) {
+func (nt *NetTable) AddRemoteNode(rn *RemoteNode) bool{
 	nt.logger.Debug("trying to add node, private %q, public %q", rn.privateIP.String(), rn.publicAddress)
 
-	if nt.localNode.State().PrivateIP.Equal(rn.privateIP) {
-		nt.logger.Debug("i found myself, node will not be added")
-		return
-	}
+	// BEFORE RUNNING UNCOMMENT THESE LINES SO IT WILL WORK PROPERLY
+	// if nt.localNode.State().PrivateIP.Equal(rn.privateIP) {
+	// 	nt.logger.Debug("i found myself, node will not be added")
+	// 	return false
+	// }
 
 	nt.lock.Lock()
 	defer nt.lock.Unlock()
@@ -80,6 +81,7 @@ func (nt *NetTable) AddRemoteNode(rn *RemoteNode) {
 	nt.peers[rn.privateIP.To4().String()] = rn
 	nt.logger.Info("added remove node, private %q, public %q", rn.privateIP.String(), rn.publicAddress)
 	go rn.listen(nt.localNode)
+	return true
 }
 
 func (nt *NetTable) RemoveRemoteNode(ip net.IP) {
@@ -143,7 +145,9 @@ func (nt *NetTable) tryConnect(h string) error {
 		return err
 	}
 	nt.logger.Debug("adding remote node...")
-	nt.AddRemoteNode(rn)
+	if nt.AddRemoteNode(rn) {
+		protocol.WriteEncodeSec(rn.conn)
+	}
 	return nil
 }
 

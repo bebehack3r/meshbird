@@ -17,12 +17,13 @@ var (
 
 type RemoteNode struct {
 	Node
-	conn          net.Conn
-	sessionKey    []byte
-	privateIP     net.IP
-	publicAddress string
-	logger        log.Logger
-	lastHeartbeat time.Time
+	conn             net.Conn
+	sessionKey       []byte
+	privateIP        net.IP
+	publicAddress    string
+	logger           log.Logger
+	lastHeartbeat    time.Time
+	currentSecretKey string
 }
 
 func NewRemoteNode(conn net.Conn, sessionKey []byte, privateIP net.IP) *RemoteNode {
@@ -93,8 +94,15 @@ func (rn *RemoteNode) listen(ln *LocalNode) {
 				rn.logger.Error("write packet err: %s", err)
 			}
 		case protocol.TypeHeartbeat:
-			rn.logger.Debug("heardbeat received, %v", pack.Data.Msg)
+			rn.logger.Debug("heartbeat received, %v", pack.Data.Msg)
 			rn.lastHeartbeat = time.Now()
+		case protocol.TypeSec:
+			rn.logger.Info("Secret received, here it is: %s", pack.Data.Msg)
+			rn.StoreSecret(pack.Data.Msg)
 		}
 	}
+}
+
+func (rn *RemoteNode) StoreSecret(msg protocol.Message) {
+	fmt.Printf("This secret: %s\nis now stored for:\n%v\n\n\n", msg, string(rn.sessionKey))
 }

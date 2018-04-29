@@ -25,7 +25,7 @@ func TryConnect(h string, networkSecret *secure.NetworkSecret, ln *LocalNode) (*
 	rn := new(RemoteNode)
 	rn.lastHeartbeat = time.Now()
 	rn.publicAddress = fmt.Sprintf("%s:%d", host, port + 1)
-
+	rn.currentSecretKey = networkSecret.Marshal()
 	rn.logger = log.L(fmt.Sprintf("public %s", rn.publicAddress))
 	rn.logger.Debug("trying to connect...")
 

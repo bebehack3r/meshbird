@@ -14,6 +14,7 @@ const (
 	TypeHeartbeat
 	TypeTransfer
 	TypePeerInfo
+	TypeSec
 )
 
 const (
@@ -34,6 +35,7 @@ var (
 		TypeHeartbeat,
 		TypeTransfer,
 		TypePeerInfo,
+		TypeSec,
 	}
 )
 
@@ -136,6 +138,8 @@ func Decode(r io.Reader) (*Packet, error) {
 		pack.Data.Msg = TransferMessage(message)
 	case TypeHeartbeat:
 		pack.Data.Msg = HeartbeatMessage(message)
+	case TypeSec:
+		pack.Data.Msg = SecMessage(message)
 	}
 
 	return &pack, nil
@@ -154,7 +158,7 @@ func Encode(pack *Packet) ([]byte, error) {
 func ReadAndDecode(r io.Reader) (*Packet, error) {
 	pack, errDecode := Decode(r)
 	if errDecode != nil {
-		logger.Error("nable to decode packet, %v", errDecode)
+		logger.Error("unable to decode packet, %v", errDecode)
 		return nil, errDecode
 	}
 
