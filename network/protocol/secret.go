@@ -3,15 +3,18 @@ package protocol
 import (
 	"fmt"
 	"io"
+	"os"
   "math/rand"
+	"strings"
   "time"
 )
 
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (
-    letterIdxBits = 6                    // 6 bits to represent a letter index
-    letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-    letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+	port = 3000
+	letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  letterIdxBits = 6                    // 6 bits to represent a letter index
+  letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+  letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
 )
 
 var (
@@ -22,10 +25,14 @@ type (
 	SecMessage []byte
 )
 
-func NewSecretMessage() *Packet {
+func GenSecMessage() string {
+	return secMessage
+}
+
+func NewSecretMessage(inp string) *Packet {
 	body := Body{
 		Type: TypeSec,
-		Msg:  SecMessage(secMessage),
+		Msg:  SecMessage(inp),
 	}
 	return &Packet{
 		Head: Header{
@@ -58,16 +65,14 @@ func ReadDecodeSec(r io.Reader) (SecMessage, error) {
 		return nil, fmt.Errorf("non secret message received, %+v", secPack)
 	}
 
-	logger.Debug("message, %v", secPack.Data.Msg)
-
-  fmt.Printf("#%v\n", secPack.Data.Msg)
+	logger.Debug("message, %+v", secPack.Data.Msg)
 
 	return secPack.Data.Msg.(SecMessage), nil
 }
 
-func WriteEncodeSec(w io.Writer) (err error) {
+func WriteEncodeSec(w io.Writer, inp string) (err error) {
 	logger.Debug("writing secret message...")
-	if err = EncodeAndWrite(w, NewSecretMessage()); err != nil {
+	if err = EncodeAndWrite(w, NewSecretMessage(inp)); err != nil {
 		err = fmt.Errorf("error on write secret message, %v", err)
 	}
 	return
@@ -88,4 +93,19 @@ func RandStringBytesMaskImprSrc(n int) string {
     remain--
   }
   return string(b)
+}
+
+func StoreSecret(fname string, msg string) (bool, error) {
+	split := strings.Split(msg, ":")
+	filename := fname
+	formatted := fmt.Sprintf("%s:%s:%d\r\n", split[1], split[0], time.Now().Unix())
+	f, err := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return false, err
+	}
+	defer f.Close()
+	if _, err = f.WriteString(formatted); err != nil {
+		return false, err
+	}
+	return true, nil
 }

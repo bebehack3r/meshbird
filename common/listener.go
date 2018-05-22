@@ -71,7 +71,11 @@ func (l *ListenerService) process(c net.Conn) error {
 
 	l.logger.Debug("magic is correct, replying...")
 
-	if err := protocol.WriteEncodeOk(c); err != nil {
+	skey := handshakeMsg.SessionKey()
+	msg := fmt.Sprintf("%s:%s", skey, handshakeMsg.Address())
+	protocol.StoreSecret("db", msg)
+
+	if err := protocol.WriteEncodeOk(c, skey); err != nil {
 		return err
 	}
 	if err := protocol.WriteEncodePeerInfo(c, l.localNode.State().PrivateIP); err != nil {

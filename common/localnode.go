@@ -14,6 +14,9 @@ type LocalNode struct {
 	config *Config
 	state  *State
 
+	address string
+	gsecret string
+
 	mutex     sync.Mutex
 	waitGroup sync.WaitGroup
 
@@ -34,13 +37,16 @@ func NewLocalNode(cfg *Config) (*LocalNode, error) {
 	n.config.NetworkID = n.secret.InfoHash()
 	n.state = NewState(n.secret)
 
+	n.address = cfg.NodeAddress
+	n.gsecret = cfg.GSecret
+
 	n.services = make(map[string]Service)
 
 	n.AddService(&NetTable{})
 	n.AddService(&ListenerService{})
 	n.AddService(&DiscoveryDHT{})
 	n.AddService(&InterfaceService{})
-	//n.AddService(&STUNService{})
+	n.AddService(&STUNService{})
 	n.AddService(&UPnPService{})
 	n.AddService(&HttpService{})
 	return n, nil
@@ -107,4 +113,8 @@ func (n *LocalNode) NetTable() *NetTable {
 		n.logger.Panic("net-table not found")
 	}
 	return service.(*NetTable)
+}
+
+func (n *LocalNode) Cipher() string {
+	return n.gsecret
 }

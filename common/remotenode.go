@@ -96,13 +96,6 @@ func (rn *RemoteNode) listen(ln *LocalNode) {
 		case protocol.TypeHeartbeat:
 			rn.logger.Debug("heartbeat received, %v", pack.Data.Msg)
 			rn.lastHeartbeat = time.Now()
-		case protocol.TypeSec:
-			rn.logger.Info("Secret received, here it is: %s", pack.Data.Msg)
-			rn.StoreSecret(pack.Data.Msg)
 		}
 	}
-}
-
-func (rn *RemoteNode) StoreSecret(msg protocol.Message) {
-	fmt.Printf("This secret: %s\nis now stored for:\n%v\n\n\n", msg, string(rn.sessionKey))
 }

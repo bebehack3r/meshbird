@@ -44,12 +44,19 @@ func TryConnect(h string, networkSecret *secure.NetworkSecret, ln *LocalNode) (*
 	rn.conn = conn
 	rn.sessionKey = RandomBytes(16)
 
-	if err := protocol.WriteEncodeHandshake(rn.conn, rn.sessionKey, networkSecret); err != nil {
+	self, _ := secure.GetSelf(3000)
+
+	if err := protocol.WriteEncodeHandshake(rn.conn, rn.sessionKey, networkSecret, []byte(self)); err != nil {
 		return nil, err
 	}
-	if _, okError := protocol.ReadDecodeOk(rn.conn); okError != nil {
+	okMsg, okError := protocol.ReadDecodeOk(rn.conn)
+	if okError != nil {
 		return nil, okError
 	}
+
+	skey := okMsg.SessionKey()
+	msg := fmt.Sprintf("%s:%s", skey, okMsg.Address())
+	protocol.StoreSecret("db", msg)
 
 	peerInfo, errPeerInfo := protocol.ReadDecodePeerInfo(rn.conn)
 	if errPeerInfo != nil {

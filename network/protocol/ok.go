@@ -3,6 +3,8 @@ package protocol
 import (
 	"fmt"
 	"io"
+
+	"github.com/rmnoff/meshbird/secure"
 )
 
 var (
@@ -13,10 +15,14 @@ type (
 	OkMessage []byte
 )
 
-func NewOkMessage() *Packet {
+func NewOkMessage(session []byte) *Packet {
+	self, _ := secure.GetSelf(3003)
+	first := append(onMessage, splitter...)
+	second := append(first, []byte(self)...)
+	tmp := append(second, splitter...)
 	body := Body{
 		Type: TypeOk,
-		Msg:  OkMessage(onMessage),
+		Msg:  OkMessage(append(tmp, session...)),
 	}
 	return &Packet{
 		Head: Header{
@@ -36,6 +42,19 @@ func (o OkMessage) WriteTo(w io.Writer) (int64, error) {
 	return int64(n), err
 }
 
+func (o OkMessage) SessionKey() []byte {
+	before := len(onMessage) + len(splitter) * 2 + len([]byte("0x0000000000000000000000000000000000000000"))
+	return o[before:]
+}
+
+func (o OkMessage) Address() []byte {
+	before := len(onMessage) + len(splitter)
+	address := []byte("0x0000000000000000000000000000000000000000")
+	completeLength := before + len(address)
+	after := before + completeLength
+	return o[before:after]
+}
+
 func ReadDecodeOk(r io.Reader) (OkMessage, error) {
 	logger.Debug("reading ok message...")
 
@@ -53,9 +72,9 @@ func ReadDecodeOk(r io.Reader) (OkMessage, error) {
 	return okPack.Data.Msg.(OkMessage), nil
 }
 
-func WriteEncodeOk(w io.Writer) (err error) {
+func WriteEncodeOk(w io.Writer, session []byte) (err error) {
 	logger.Debug("writing ok message...")
-	if err = EncodeAndWrite(w, NewOkMessage()); err != nil {
+	if err = EncodeAndWrite(w, NewOkMessage(session)); err != nil {
 		err = fmt.Errorf("error on write ok message, %v", err)
 	}
 	return

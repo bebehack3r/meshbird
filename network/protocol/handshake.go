@@ -8,7 +8,8 @@ import (
 )
 
 var (
-	magicKey = []byte{'M', 'E', 'S', 'H', 'B', 'I', 'R', 'D'}
+	magicKey = []byte{'C', 'P', 'H', 'R'}
+	splitter = []byte{':'}
 )
 
 type (
@@ -20,8 +21,11 @@ func IsMagicValid(data []byte) bool {
 	return bytes.HasPrefix(data, magicKey)
 }
 
-func NewHandshakePacket(sessionKey []byte, networkSecret *secure.NetworkSecret) *Packet {
-	sessionKey = append(magicKey, sessionKey...)
+func NewHandshakePacket(sessionKey []byte, networkSecret *secure.NetworkSecret, address []byte) *Packet {
+	first := append(magicKey, splitter...)
+	second := append(first, address...)
+	tmp := append(second, splitter...)
+	sessionKey = append(tmp, sessionKey...)
 	data := networkSecret.Encode(sessionKey)
 
 	body := Body{
@@ -51,7 +55,14 @@ func (m HandshakeMessage) Bytes() []byte {
 }
 
 func (m HandshakeMessage) SessionKey() []byte {
-	return m[len(magicKey):]
+	length := len(magicKey) + len(splitter) * 2 + len([]byte("0x0000000000000000000000000000000000000000"))
+	return m[length:]
+}
+
+func (m HandshakeMessage) Address() []byte {
+	before := len(magicKey) + len(splitter)
+	after := len(splitter) + len([]byte("0x0000000000000000000000000000000000000000"))
+	return m[before:after]
 }
 
 func ReadDecodeHandshake(r io.Reader) (HandshakeMessage, error) {
@@ -71,9 +82,9 @@ func ReadDecodeHandshake(r io.Reader) (HandshakeMessage, error) {
 	return handshakePack.Data.Msg.(HandshakeMessage), nil
 }
 
-func WriteEncodeHandshake(w io.Writer, sessionKey []byte, networkSecret *secure.NetworkSecret) (err error) {
+func WriteEncodeHandshake(w io.Writer, sessionKey []byte, networkSecret *secure.NetworkSecret, address []byte) (err error) {
 	logger.Debug("writing handshare message...")
-	if err = EncodeAndWrite(w, NewHandshakePacket(sessionKey, networkSecret)); err != nil {
+	if err = EncodeAndWrite(w, NewHandshakePacket(sessionKey, networkSecret, address)); err != nil {
 		err = fmt.Errorf("error on write handshare message, %v", err)
 	}
 	return
