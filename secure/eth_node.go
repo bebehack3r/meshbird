@@ -41,6 +41,28 @@ func Encode(port int, cipher string, message string) (result string, err error) 
   return self, nil
 }
 
+func CheckInbox(port int, s string) (result string, err error) {
+  err = nil
+  url := fmt.Sprintf("http://localhost:%d/inbox", port)
+
+  var jsonStr = []byte(fmt.Sprintf(`{"s": "%s"}`, s))
+  req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
+  req.Close = true
+  req.Header.Set("Content-Type", "application/json")
+
+  client := &http.Client{}
+  resp, err := client.Do(req)
+  if err != nil {
+    return "", err
+  }
+  defer resp.Body.Close()
+  body, _ := ioutil.ReadAll(resp.Body)
+  node := HTTPResponse{}
+  json.Unmarshal(body, &node)
+  msgs := node.Response
+  return msgs, nil
+}
+
 func SendMessage(port int, address string, message string) (result string, err error) {
   err = nil
   url := fmt.Sprintf("http://localhost:%d/", port)
